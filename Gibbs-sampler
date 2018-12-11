@@ -1,0 +1,40 @@
+using Distributions,Printf,Plots, Random, DataFrames
+
+
+#gibbs sampler
+"""function for gibbs sampler 
+y: is the response vector
+X0: is the design matrix for intercept
+X1: is the design matrix for slope
+β0: is the intercept
+β1: is the slope
+sigma2: is the variance of the standard error 
+iter: is the number of the iterations in the gibbs sampling 
+"""
+function gibbs_sampler(y, X0, X1, β0, β1, sigma2, iter)
+    β0_post = []
+    β1_post = []
+    sigma2_post = Array{Float64}(undef, iter, length(y))
+    """
+    beta0_hat = inv(transpose(X0)*X0)*transpose(X0)*y
+    beta1_hat = inv(transpose(X1)*X1)*transpose(X1)*y
+    """
+    """
+    define a pdf for the full conditional posterior distribution in matrix notation
+    dist_beta0 = Normal(inv(transpose(X0)*X0)*transpose(X0)*(y - X1*beta1_post[i]), transpose(X0)*X0*(sigma2.^2))
+    dist_beta1 = Normal(inv(transpose(X1)*X1)*transpose(X0)*(y - X0*beta1_post[i]), transpose(X1)*X1*(sigma2.^2))
+    """
+    #beta1_post[1] = beta1
+    push!(β0_post, β0)
+    #initiliase one parameter either β0 or β1 
+    
+    for i in 1:iter
+        dist_β1 = Normal((inv(transpose(X1)*X1)*transpose(X1)*(y - X0*β0_post[i]))[1], (inv(transpose(X1)*X1)*(sigma2).^2)[1])
+        push!(β1_post, rand(dist_β1))
+        dist_β0 = Normal((inv(transpose(X0)*X0)*transpose(X0)*(y - X1*β1_post[i]))[1], (inv(transpose(X0)*X0)*(sigma2).^2)[1])
+        push!(β0_post, rand(dist_β0))
+        # returns an array of two lists with beta1 and beta0
+    end
+  return β0_post, β1_post
+    
+end
